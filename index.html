@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Noakes PT Running Analysis Workflow & Report Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #f5f8fa;
+      --surface: #ffffff;
+      --surface2: #f0f4f8;
+      --text: #1a2b36;
+      --muted: #5c7283;
+      --line: #cbdce6;
+      --primary: #0f5b72;
+      --primary-light: #e6f2f5;
+      --primary2: #0b4354;
+      --accent: #d39a3c;
+      --good: #1a7f4c;
+      --good-bg: #e6f6ed;
+      --watch: #d18200;
+      --watch-bg: #fff6e6;
+      --focus: #bd2a2a;
+      --focus-bg: #ffebeb;
+      --shadow: 0 10px 30px rgba(15, 91, 114, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+      --radius: 16px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      outline-color: var(--primary);
+    }
+
+    html {
+      -webkit-text-size-adjust: none;
+      text-size-adjust: none;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'DM Serif Display', Georgia, serif;
+      line-height: 1.15;
+      margin: 0;
+      color: var(--primary2);
+    }
+
+    p { margin: 0; }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; transition: var(--transition); }
+
+    /* Layout & Header */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(245, 248, 250, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line);
+      transition: var(--transition);
+    }
+
+    .topbar-inner, .wrap, .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      display: grid;
+      place-items: center;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(15, 91, 114, 0.2);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 42px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover {
+      background: var(--surface2);
+      border-color: var(--muted);
+    }
+
+    .btn.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .btn.primary:hover {
+      background: var(--primary2);
+      box-shadow: 0 4px 12px rgba(15, 91, 114, 0.15);
+    }
+
+    .btn.subtle {
+      background: var(--surface2);
+      border-color: transparent;
+    }
+
+    .btn.subtle:hover {
+      background: var(--line);
+    }
+
+    .wrap {
+      padding: 24px 20px 140px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      overflow: hidden;
+    }
+
+    .card:hover {
+      box-shadow: 0 14px 35px rgba(15, 91, 114, 0.09);
+    }
+
+    .pad {
+      padding: 24px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    /* Main App Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+    }
+
+    .section {
+      padding: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .section:first-child {
+      border-top: none;
+    }
+
+    .section-head {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .grid2, .grid3, .stats, .patient-meta {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--primary2);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .field input, .field textarea, .field select {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+      transition: var(--transition);
+    }
+
+    .field input:focus, .field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    .field textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    /* Segmented Controls Styling */
+    .seg {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      background: var(--surface2);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 4px;
+    }
+
+    .seg button {
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      padding: 8px 4px;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 13px;
+    }
+
+    .seg button.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(15, 91, 114, 0.2);
+    }
+
+    .mini-toggle {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .mini-toggle button {
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .mini-toggle button.active {
+      background: var(--primary-light);
+      color: var(--primary2);
+      border-color: var(--primary);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--surface2);
+      border: 1.5px solid var(--line);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary2);
+    }
+
+    /* Report & Layout elements */
+    .stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stat {
+      padding: 16px 12px;
+      border-radius: 14px;
+      background: #fdfdfd;
+      border: 1.5px solid var(--line);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 32px;
+      margin-bottom: 2px;
+      font-family: 'DM Serif Display', Georgia, serif;
+    }
+
+    .stat span {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .good strong { color: var(--good); }
+    .good { background-color: var(--good-bg); border-color: rgba(26, 127, 76, 0.2); }
+    .watch strong { color: var(--watch); }
+    .watch { background-color: var(--watch-bg); border-color: rgba(209, 130, 0, 0.2); }
+    .focus strong { color: var(--focus); }
+    .focus { background-color: var(--focus-bg); border-color: rgba(189, 42, 42, 0.2); }
+
+    .report-shell {
+      padding: 32px;
+      border-radius: 20px;
+      background: #fff;
+      border: 1.5px solid var(--line);
+      position: relative;
+    }
+
+    .report-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--line);
+    }
+
+    .patient-meta {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 20px;
+    }
+
+    .summary-box {
+      padding: 20px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fbfdfe 0%, #f4f8fb 100%);
+      border: 1.5px solid var(--line);
+    }
+
+    .finding, .step {
+      padding: 16px 0;
+      border-top: 1.5px dashed var(--line);
+    }
+
+    .finding:first-child, .step:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .finding-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pill.good { background: var(--good-bg); color: var(--good); }
+    .pill.watch { background: var(--watch-bg); color: var(--watch); }
+    .pill.focus { background: var(--focus-bg); color: var(--focus); }
+
+    .step {
+      padding: 16px;
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      margin-top: 12px;
+    }
+
+    /* Home Plan Selection Checklist */
+    .exercise-selection {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      max-height: 250px;
+      overflow-y: auto;
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .exercise-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 13.5px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .exercise-option:hover {
+      background: var(--surface2);
+    }
+
+    .exercise-option input {
+      width: auto;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+
+    /* Accordion for Normative Reference Guidelines */
+    .normative-accordion {
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .normative-header {
+      background: var(--surface2);
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--primary2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .normative-content {
+      padding: 0 16px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .normative-content.open {
+      padding: 16px;
+      max-height: 400px;
+      border-top: 1.5px solid var(--line);
+      overflow-y: auto;
+    }
+
+    .normative-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .normative-table th, .normative-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* Modal / Toast Notification System */
+    .custom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 91, 114, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .custom-modal {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--line);
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    .custom-toast-container {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      z-index: 110;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 320px;
+      pointer-events: none;
+    }
+
+    .custom-toast {
+      pointer-events: auto;
+      background: var(--primary2);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      animation: slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .footerbar {
+      position: fixed;
+      inset: auto 0 0 0;
+      z-index: 25;
+      background: rgba(245, 248, 250, 0.9);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-inner {
+      padding: 14px 20px calc(env(safe-area-inset-bottom, 0px) + 14px);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .hidden-print {
+      display: block;
+    }
+
+    @media (max-width: 1024px) {
+      .hero, .layout {
+        grid-template-columns: 1fr;
+      }
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .grid2, .grid3, .patient-meta {
+        grid-template-columns: 1fr;
+      }
+      .topbar-inner, .footer-inner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar-actions .btn, .footer-inner .btn {
+        width: 100%;
+      }
+    }
+
+    /* Print-Specific Styles */
+    @media print {
+      .topbar, .hero, #assessmentPane, .footerbar, .hidden-print, .normative-accordion {
+        display: none !important;
+      }
+      body {
+        background: #fff;
+      }
+      .wrap {
+        padding: 0;
+        max-width: none;
+      }
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .card, .report-shell {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+      }
+      .report-shell {
+        padding: 0.25in;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Dialog Modals -->
+  <div class="custom-modal-overlay" id="customModalOverlay">
+    <div class="custom-modal">
+      <div class="pad" style="background: var(--surface2); border-bottom: 1px solid var(--line);">
+        <h3 id="modalTitle" style="font-size: 20px;">Notification</h3>
+      </div>
+      <div class="pad">
+        <p id="modalBody" class="muted" style="font-size: 15px; margin-bottom: 20px;">Message content goes here.</p>
+        <div style="display:flex; justify-content: flex-end; gap: 10px;">
+          <button class="btn primary" id="modalOkBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Toasts Container -->
+  <div class="custom-toast-container" id="toastContainer"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="mark">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M3 17L7 7l3 6 4-4 4 8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="18.5" cy="7" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700; color: var(--primary2);">Noakes Physical Therapy</h2>
+          <div class="muted" style="font-size:12px; font-weight: 500;">Clinical gait biomechanics + customized home programs</div>
+        </div>
+      </div>
+      <div class="toolbar-actions">
+        <button class="btn subtle" id="demoBtn">Load clinical demo</button>
+        <button class="btn" id="jumpReportBtn">View report</button>
+        <button class="btn primary" id="generateBtn">Update Patient Report</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero hidden-print">
+      <div class="card pad stack" style="border-left: 5px solid var(--primary);">
+        <h1>Running Gait Workshop Planner</h1>
+        <p class="muted" style="font-size: 15px;">Document biomechanical findings on the left. Choose specific evidence-based drills to instantly compile a polished, print-ready home exercise plan for the patient on the right.</p>
+        <div class="chips">
+          <span class="chip">Pelvic Tilt Alignment</span>
+          <span class="chip">Custom Drills Selector</span>
+          <span class="chip">CKC Dorsiflexion</span>
+          <span class="chip">PDF-Friendly Export</span>
+        </div>
+      </div>
+      <div class="card pad stack" style="background: linear-gradient(135deg, var(--surface), var(--surface2));">
+        <h2>Report Options</h2>
+        <p class="muted" style="font-size: 14px;">Select the counseling tone of voice. Choose the target focus side to instantly adapt corrective guidelines and cueing instructions.</p>
+        <div class="field">
+          <label>Advice Tone Priority</label>
+          <div class="mini-toggle" id="toneToggle"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App Body Content -->
+    <div class="layout">
+      <!-- Left Column: Clinician Assessment Form Pane -->
+      <section id="assessmentPane" class="card">
+        <form id="assessmentForm" onsubmit="return false;">
+          
+          <div class="section">
+            <div class="section-head">
+              <h2>Patient Demographics &amp; Complaint</h2>
+              <p>Identify primary side of symptoms and baseline concerns.</p>
+            </div>
+            
+            <div class="field" style="margin-bottom:14px">
+              <label>Symptomatic Side Identification</label>
+              <div class="mini-toggle" id="sideToggle">
+                <!-- symptomatic side buttons injected by JS -->
+              </div>
+            </div>
+
+            <div class="grid2">
+              <div class="field">
+                <label>Patient name <span style="color: var(--focus);">*</span></label>
+                <input name="patientName" placeholder="Full name" required>
+              </div>
+              <div class="field">
+                <label>Assessment date</label>
+                <input type="date" name="date">
+              </div>
+              <div class="field">
+                <label>Age</label>
+                <input type="number" name="age" placeholder="e.g. 32">
+              </div>
+              <div class="field">
+                <label>Main complaint concern</label>
+                <input name="mainConcern" placeholder="e.g. lateral knee irritation">
+              </div>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label>Session subjective intake notes</label>
+              <textarea name="notes" placeholder="Describe symptoms, training volume, shoes, running history, and specific goals..."></textarea>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h2>Stance &amp; Stride Metrics</h2>
+              <p>Assess dynamic step parameters under steady running states.</p>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>Stride length relative to COM</label>
+                <div class="seg" data-name="strideLength" data-options="decreased|normal|increased"></div>
+              </div>
+              <div class="field">
+                <label>Measured Cadence (spm)</label>
+                <input type="number" min="120" max="220" name="strideRate" placeholder="e.g. 165">
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h2>Posture &amp; Pelvic Alignment</h2>
+              <p>Trunk posture and core sagittal control during the stance phase.</p>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>Sagittal forward lean</label>
+                <div class="seg" data-name="forwardLean" data-options="reduced|normal|increased"></div>
+              </div>
+              <div class="field">
+                <label>Pelvic Tilt</label>
+                <div class="seg" data-name="pelvicTilt" data-options="anterior|neutral|posterior"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h2>Lower Extremity Alignment</h2>
+              <p>Assess dynamic frontal/transverse stability of hip, knee, and foot structures.</p>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>Hip stability (Left)</label>
+                <div class="seg" data-name="hipStabilityLeft" data-options="adducted|normal|abducted"></div>
+              </div>
+              <div class="field">
+                <label>Hip stability (Right)</label>
+                <div class="seg" data-name="hipStabilityRight" data-options="adducted|normal|abducted"></div>
+              </div>
+              <div class="field">
+                <label>Knee stability (Left)</label>
+                <div class="seg" data-name="kneeStabilityLeft" data-options="adducted|normal|abducted"></div>
+              </div>
+              <div class="field">
+                <label>Knee stability (Right)</label>
+                <div class="seg" data-name="kneeStabilityRight" data-options="adducted|normal|abducted"></div>
+              </div>
+              <div class="field">
+                <label>Foot pronation (Left)</label>
+                <div class="seg" data-name="pronationLeft" data-options="increased|normal|decreased"></div>
+              </div>
+              <div class="field">
+                <label>Foot pronation (Right)</label>
+                <div class="seg" data-name="pronationRight" data-options="increased|normal|decreased"></div>
+              </div>
+              <div class="field">
+                <label>Foot strike (Left)</label>
+                <div class="seg" data-name="footStrikeLeft" data-options="heel|midfoot|forefoot"></div>
+              </div>
+              <div class="field">
+                <label>Foot strike (Right)</label>
+                <div class="seg" data-name="footStrikeRight" data-options="heel|midfoot|forefoot"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h2>Objective Strength &amp; Mobility</h2>
+              <p>Quantitative physical performance markers measured in the clinic.</p>
+            </div>
+            <div class="grid2">
+              <div class="field">
+                <label>Ankle DF Left (cm) <span class="hint">Knee-to-wall</span></label>
+                <input type="number" step="0.1" name="ankleDfCkcLeft" placeholder="e.g. 10.5">
+              </div>
+              <div class="field">
+                <label>Ankle DF Right (cm) <span class="hint">Knee-to-wall</span></label>
+                <input type="number" step="0.1" name="ankleDfCkcRight" placeholder="e.g. 10.5">
+              </div>
+            </div>
+            
+            <div class="field" style="margin-top:14px">
+              <label>Hip Strength Unit Selection</label>
+              <div class="mini-toggle" id="unitToggle"></div>
+            </div>
+
+            <div class="grid3" style="margin-top:14px">
+              <div class="field">
+                <label>Hip Abduction Left</label>
+                <input type="number" step="0.1" name="hipAbductionLeft" placeholder="Force">
+              </div>
+              <div class="field">
+                <label>Hip Abduction Right</label>
+                <input type="number" step="0.1" name="hipAbductionRight" placeholder="Force">
+              </div>
+              <div class="field">
+                <label>Limb Length Left (cm)</label>
+                <input type="number" step="0.1" name="limbLengthLeft" placeholder="Height">
+              </div>
+              <div class="field">
+                <label>Limb Length Right (cm)</label>
+                <input type="number" step="0.1" name="limbLengthRight" placeholder="Height">
+              </div>
+              <div class="field">
+                <label>SLR Ant. Reach Left (cm)</label>
+                <input type="number" step="0.1" name="slrAntReachLeft" placeholder="Reach">
+              </div>
+              <div class="field">
+                <label>SLR Ant. Reach Right (cm)</label>
+                <input type="number" step="0.1" name="slrAntReachRight" placeholder="Reach">
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h2>Home Exercise Program Planner</h2>
+              <p>Select target exercises/drills to instantly output with safety instructions.</p>
+            </div>
+            <div class="field">
+              <label>Rehabilitation Movement Options</label>
+              <div class="exercise-selection" id="exerciseSelector">
+                <!-- Checkboxes populated via JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-head">
+              <h2>Normative Reference Cheat Sheet</h2>
+              <p>Quick clinical reference guideline parameters.</p>
+            </div>
+            <div class="normative-accordion">
+              <div class="normative-header" onclick="toggleNormativeAccordion()">
+                <span>Normative Values &amp; Targets Guide</span>
+                <span id="accordionIcon">▼</span>
+              </div>
+              <div class="normative-content" id="accordionContent">
+                <table class="normative-table">
+                  <thead>
+                    <tr>
+                      <th>Clinical Measure</th>
+                      <th>Optimal / Target Range</th>
+                      <th>Watch / Attention Threshold</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Running Cadence</td>
+                      <td>170 – 185 steps/min</td>
+                      <td>&lt; 165 or &gt; 195 steps/min</td>
+                    </tr>
+                    <tr>
+                      <td>Ankle Dorsiflexion</td>
+                      <td>&ge; 12.0 cm (knee-to-wall)</td>
+                      <td>&lt; 10.0 cm (increased restriction)</td>
+                    </tr>
+                    <tr>
+                      <td>Hip Abduction Strength</td>
+                      <td>&lt; 10% side-to-side asymmetry</td>
+                      <td>&ge; 15% discrepancy / asymmetry</td>
+                    </tr>
+                    <tr>
+                      <td>Single Leg Reach Ratio</td>
+                      <td>&ge; 70% of limb length</td>
+                      <td>&lt; 60% of limb length (deficit)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right Column: Interactive Patient Report Card Pane -->
+      <section class="card pad" id="reportPane">
+        <div class="report-shell" id="reportShell">
+          
+          <div class="report-head">
+            <div>
+              <h2 style="font-size: 26px; color: var(--primary);">Running Analysis &amp; Gait Profile</h2>
+              <p class="muted" style="margin-top:6px; max-width:55ch; font-size:14px;">Clinical assessment mapping physical metrics to gait patterns, complete with dynamic training instructions and cues.</p>
+            </div>
+            <div class="muted" style="font-size:13px; border-left: 2px solid var(--line); padding-left: 12px; min-width: 180px;">
+              <div><strong>Patient:</strong> <span id="rPatient" style="color:var(--text); font-weight:700;">Patient name</span></div>
+              <div style="margin-top:4px"><strong>Date:</strong> <span id="rDate">—</span></div>
+              <div style="margin-top:4px"><strong>Focus Area:</strong> <span id="rConcern">—</span></div>
+            </div>
+          </div>
+
+          <!-- Summary Status Dashboard Cards -->
+          <div class="stats" style="margin-top:24px">
+            <div class="stat focus"><strong id="focusCount">0</strong><span>Needs attention</span></div>
+            <div class="stat watch"><strong id="watchCount">0</strong><span>Watch areas</span></div>
+            <div class="stat good"><strong id="goodCount">0</strong><span>Going well</span></div>
+            <div class="stat"><strong id="mainFocus">—</strong><span>Main Focus</span></div>
+          </div>
+
+          <div class="summary-box" style="margin-top:20px">
+            <h3 style="font-size: 18px; color: var(--primary2);">Clinical Summary &amp; Assessment</h3>
+            <p class="muted" id="summaryText" style="margin-top:6px; font-size:14px;">Please complete the clinical details on the left, then trigger report compilation below.</p>
+            <div style="margin-top:14px">
+              <h4 style="font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--primary);">Primary Key Targets</h4>
+              <div class="chips" id="keyChips" style="margin-top:8px"><span class="chip">No items flagged yet</span></div>
+            </div>
+          </div>
+
+          <div class="patient-meta">
+            <div class="summary-box">
+              <h3 style="font-size: 16px; color: var(--primary2);">Subjective &amp; Clinical Notes</h3>
+              <p class="muted" id="noteText" style="margin-top:6px; font-size:13px;">No patient records loaded.</p>
+            </div>
+            <div class="summary-box">
+              <h3 style="font-size: 16px; color: var(--primary2);">Ankle Mobility Profile</h3>
+              <p class="muted" id="ankleDetailText" style="margin-top:6px; font-size:13px;">Ankle closed-chain (CKC) dorsiflexion path. Keeping values symmetry is vital to optimize shin angles and minimize knee joint stress.</p>
+            </div>
+          </div>
+
+          <div style="margin-top:24px">
+            <h3 style="font-size: 18px; color: var(--good); border-bottom: 2px solid var(--good); padding-bottom: 6px; margin-bottom:12px;">Optimal Movement Patterns (Going Well)</h3>
+            <div id="goodList"></div>
+          </div>
+
+          <div style="margin-top:24px">
+            <h3 style="font-size: 18px; color: var(--focus); border-bottom: 2px solid var(--focus); padding-bottom: 6px; margin-bottom:12px;">Dynamic Compensations &amp; Focus Areas</h3>
+            <div id="attentionList"></div>
+          </div>
+
+          <div style="margin-top:24px">
+            <h3 style="font-size: 18px; color: var(--primary2); border-bottom: 2px solid var(--primary); padding-bottom: 6px; margin-bottom:12px;">Custom Home Program Exercises &amp; Cues</h3>
+            <div id="stepsList"></div>
+          </div>
+
+          <!-- Professional Print Footer Blocks -->
+          <div style="margin-top:32px; padding-top:20px; border-top:1.5px solid var(--line); display:grid; grid-template-columns:1fr 220px; gap:20px">
+            <div>
+              <div class="muted" style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Clinical Prescription Guidelines</div>
+              <div style="height:1.5px; background:var(--line); margin-top:35px"></div>
+            </div>
+            <div>
+              <div class="muted" style="font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">Physiotherapist Signature</div>
+              <div style="height:1.5px; background:var(--line); margin-top:35px"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="footerbar hidden-print">
+    <div class="footer-inner">
+      <button class="btn" id="clearBtn">Reset assessment sheet</button>
+      <button class="btn" id="printBtn">Export / Save PDF Handout</button>
+      <button class="btn primary" id="generateBottomBtn">Compile &amp; Generate Patient Handout</button>
+    </div>
+  </div>
+
+  <script>
+    const state = { 
+      tone: 'balanced', 
+      strengthUnit: 'lbs', 
+      symptomaticSide: 'right',
+      pelvicTilt: 'neutral',
+      selectedExercises: [] 
+    };
+
+    const labelMap = {
+      decreased: 'Reduced Space',
+      normal: 'Normal / Stable',
+      increased: 'Increased / Excess',
+      reduced: 'Reduced / Shallow Angle',
+      adducted: 'Collapses inward (adducted)',
+      abducted: 'Drifts outward (abducted)',
+      anterior: 'Anterior Pelvic Tilt',
+      neutral: 'Neutral Pelvic Tilt',
+      posterior: 'Posterior Pelvic Tilt',
+      heel: 'Heel strike pattern',
+      midfoot: 'Midfoot landing',
+      forefoot: 'Forefoot landing',
+      reassuring: 'Reassuring / Empathetic',
+      balanced: 'Balanced / Clinical',
+      direct: 'Direct / Goal-Oriented',
+      lbs: 'lbs',
+      kg: 'kg',
+      N: 'N',
+      left: 'Left Side',
+      right: 'Right Side',
+      na: 'No main side'
+    };
+
+    // Updated clinical exercises database based on user instruction
+    const exerciseDatabase = [
+      { 
+        id: 'half_kneeling_ankle', 
+        title: 'Half Kneeling Ankle Mobilization', 
+        text: 'Stand in half-kneeling. Keeping front heel pinned, drive your front knee directly over your small toes to increase closed-chain dorsiflexion movement path.', 
+        category: 'Mobility' 
+      },
+      { 
+        id: 'hip_flexor_stretch', 
+        title: 'Hip Flexor Stretch', 
+        text: 'Drop into a half-kneeling stretch. Tilt your pelvis backward (posterior pelvic tilt) and gently push hips forward to target front hip structures without arching lower back.', 
+        category: 'Mobility' 
+      },
+      { 
+        id: 'split_squat_bulgarian', 
+        title: 'Split Squat / Bulgarian Split Squat', 
+        text: 'Build functional thigh and glute control. Place rear foot elevated or stepped back. Keep front knee aligned over front foot tracking path.', 
+        category: 'Strength' 
+      },
+      { 
+        id: 'standing_clamshells', 
+        title: 'Standing Clamshells', 
+        text: 'Position exercise band above knee line. Hold single-leg athletic stance and open swing leg thigh outward to activate core hip external rotators.', 
+        category: 'Strength' 
+      },
+      { 
+        id: 'plyometric_exercise', 
+        title: '1-2 Plyometric Exercise (TBD)', 
+        text: 'Dynamic plyometric focus to increase ankle stiffness, lower limb reactive efficiency, and stable control during rapid shock absorption cycles.', 
+        category: 'Power' 
+      },
+      { 
+        id: 'cadence_metronome_lean', 
+        title: 'Cadence with Metronome & Forward Lean', 
+        text: 'Run matching steps to an acoustic metronome (e.g., +5-10% spm) while practicing slight, balanced forward posture leaning from the ankle line.', 
+        category: 'Technique' 
+      },
+      { 
+        id: 'minimize_crossover_gait', 
+        title: 'Minimize Crossover Gait', 
+        text: 'Avoid crossing over your midline. Think of running along a narrow hallway line, ensuring left and right foot strikes stay parallel on respective tracks.', 
+        category: 'Technique' 
+      }
+    ];
+
+    // Build segment button interfaces
+    function buildSegs() {
+      document.querySelectorAll('.seg').forEach(el => {
+        const name = el.dataset.name;
+        const options = el.dataset.options.split('|');
+        el.innerHTML = '';
+        options.forEach(opt => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = labelMap[opt] || opt;
+          b.dataset.value = opt;
+          if (state[name] === opt) b.classList.add('active');
+          b.onclick = () => {
+            state[name] = opt;
+            [...el.children].forEach(c => c.classList.toggle('active', c === b));
+          };
+          el.appendChild(b);
+        });
+      });
+    }
+
+    function buildToggles() {
+      const tone = document.getElementById('toneToggle');
+      tone.innerHTML = '';
+      ['reassuring', 'balanced', 'direct'].forEach(v => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn';
+        b.textContent = labelMap[v];
+        if (v === state.tone) b.classList.add('primary');
+        b.onclick = () => {
+          state.tone = v;
+          [...tone.children].forEach(c => c.classList.remove('primary'));
+          b.classList.add('primary');
+          showToast(`Advice tone updated: ${labelMap[v]}`, 'info');
+        };
+        tone.appendChild(b);
+      });
+
+      const unit = document.getElementById('unitToggle');
+      unit.innerHTML = '';
+      ['lbs', 'kg', 'N'].forEach(v => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = v;
+        if (v === state.strengthUnit) b.classList.add('active');
+        b.onclick = () => {
+          state.strengthUnit = v;
+          [...unit.children].forEach(c => c.classList.remove('active'));
+          b.classList.add('active');
+        };
+        unit.appendChild(b);
+      });
+
+      const side = document.getElementById('sideToggle');
+      side.innerHTML = '';
+      ['left', 'right', 'na'].forEach(v => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn';
+        b.textContent = v === 'na' ? 'Symmetrical focus' : `Symptomatic: ${v.toUpperCase()}`;
+        if (v === (state.symptomaticSide || 'right')) b.classList.add('primary');
+        b.onclick = () => {
+          state.symptomaticSide = v;
+          [...side.children].forEach(c => c.classList.remove('primary'));
+          b.classList.add('primary');
+          showToast(`Target Focus shifted to ${v === 'na' ? 'Symmetrical Alignment' : v.toUpperCase()}`, 'info');
+        };
+        side.appendChild(b);
+      });
+    }
+
+    // Build the Home Plan Exercise Checklist
+    function buildExercisePlanner() {
+      const parent = document.getElementById('exerciseSelector');
+      parent.innerHTML = '';
+      exerciseDatabase.forEach(ex => {
+        const label = document.createElement('label');
+        label.className = 'exercise-option';
+        
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = ex.id;
+        input.checked = state.selectedExercises.includes(ex.id);
+        input.onchange = (e) => {
+          if (e.target.checked) {
+            if (!state.selectedExercises.includes(ex.id)) state.selectedExercises.push(ex.id);
+          } else {
+            state.selectedExercises = state.selectedExercises.filter(id => id !== ex.id);
+          }
+        };
+
+        const content = document.createElement('div');
+        content.innerHTML = `<strong>${ex.title}</strong> <span class="hint">(${ex.category})</span><div style="font-size:12px;" class="muted">${ex.text}</div>`;
+        
+        label.appendChild(input);
+        label.appendChild(content);
+        parent.appendChild(label);
+      });
+    }
+
+    // Modal Control wrappers (replacing window.alert)
+    function showModal(title, body, okText = "Okay") {
+      const overlay = document.getElementById('customModalOverlay');
+      const titleEl = document.getElementById('modalTitle');
+      const bodyEl = document.getElementById('modalBody');
+      const okBtn = document.getElementById('modalOkBtn');
+
+      titleEl.textContent = title;
+      bodyEl.textContent = body;
+      okBtn.textContent = okText;
+
+      overlay.style.display = 'flex';
+      
+      okBtn.onclick = () => {
+        overlay.style.display = 'none';
+      };
+    }
+
+    // Custom Toast notifications (replacing window.alert)
+    function showToast(text, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'custom-toast';
+      
+      if (type === 'error') {
+        toast.style.background = 'var(--focus)';
+      } else if (type === 'info') {
+        toast.style.background = 'var(--primary)';
+      } else if (type === 'success') {
+        toast.style.background = 'var(--good)';
+      }
+
+      toast.innerHTML = `<span>${text}</span><button style="background:none; border:none; color:#fff; font-weight:bold; cursor:pointer; margin-left: 10px;">×</button>`;
+      
+      toast.querySelector('button').onclick = () => {
+        toast.remove();
+      };
+
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function toggleNormativeAccordion() {
+      const content = document.getElementById('accordionContent');
+      const icon = document.getElementById('accordionIcon');
+      content.classList.toggle('open');
+      if (content.classList.contains('open')) {
+        icon.textContent = '▲';
+      } else {
+        icon.textContent = '▼';
+      }
+    }
+
+    // Retrieve input values helper functions
+    function getText(name) {
+      const el = document.querySelector(`[name="${name}"]`);
+      return el ? el.value.trim() : (state[name] || '');
+    }
+
+    function getNum(name) {
+      const v = getText(name);
+      return v === '' ? null : Number(v);
+    }
+
+    // Collect all inputs into single data payload
+    function collect() {
+      return {
+        patientName: getText('patientName'),
+        date: getText('date'),
+        age: getNum('age'),
+        mainConcern: getText('mainConcern'),
+        notes: getText('notes'),
+        tone: state.tone,
+        strengthUnit: state.strengthUnit,
+        symptomaticSide: state.symptomaticSide || 'right',
+        strideLength: state.strideLength || '',
+        strideRate: getNum('strideRate'),
+        forwardLean: state.forwardLean || '',
+        pelvicTilt: state.pelvicTilt || 'neutral',
+        hipStabilityLeft: state.hipStabilityLeft || '',
+        hipStabilityRight: state.hipStabilityRight || '',
+        kneeStabilityLeft: state.kneeStabilityLeft || '',
+        kneeStabilityRight: state.kneeStabilityRight || '',
+        pronationLeft: state.pronationLeft || '',
+        pronationRight: state.pronationRight || '',
+        footStrikeLeft: state.footStrikeLeft || '',
+        footStrikeRight: state.footStrikeRight || '',
+        ankleDfCkcLeft: getNum('ankleDfCkcLeft'),
+        ankleDfCkcRight: getNum('ankleDfCkcRight'),
+        hipAbductionLeft: getNum('hipAbductionLeft'),
+        hipAbductionRight: getNum('hipAbductionRight'),
+        slrAntReachLeft: getNum('slrAntReachLeft'),
+        slrAntReachRight: getNum('slrAntReachRight'),
+        limbLengthLeft: getNum('limbLengthLeft'),
+        limbLengthRight: getNum('limbLengthRight')
+      };
+    }
+
+    function cadenceStatus(spm) {
+      if (!spm) return 'watch';
+      if (spm >= 170 && spm <= 185) return 'good';
+      if (spm >= 160 && spm <= 195) return 'watch';
+      return 'focus';
+    }
+
+    function ankleStatus(cm) {
+      if (cm == null) return 'watch';
+      if (cm >= 12) return 'good';
+      if (cm >= 8) return 'watch';
+      return 'focus';
+    }
+
+    function strengthStatus(l, r) {
+      if (!l || !r) return 'watch';
+      const ratio = Math.min(l, r) / Math.max(l, r);
+      if (ratio >= .9) return 'good';
+      if (ratio >= .8) return 'watch';
+      return 'focus';
+    }
+
+    function pill(status) {
+      return `<span class="pill ${status}">${status === 'good' ? 'Optimal Range' : status === 'watch' ? 'Watch Limit' : 'Attention Priority'}</span>`;
+    }
+
+    function buildReport(data) {
+      const good = [], attention = [], steps = [], chips = [];
+      const add = (arr, title, detail, status) => arr.push({ title, detail, status });
+      const step = (title, text) => steps.push({ title, text });
+
+      // Cadence Analysis
+      const c = cadenceStatus(data.strideRate);
+      if (data.strideRate != null) {
+        if (c === 'good') {
+          add(good, 'Dynamic Step Rate (Cadence)', `Your cadence of ${data.strideRate} spm falls within the target efficiency window (170-185), reducing average impact load.`, 'good');
+        } else {
+          add(attention, 'Dynamic Step Rate (Cadence)', 
+            data.strideRate < 170
+              ? `Your step rate (${data.strideRate} spm) is below optimal. Shorter, quicker strides can lower joint loading forces.`
+              : `Your cadence of ${data.strideRate} spm is high. Ensure it matches structured endurance pacing goals.`,
+            c);
+          chips.push('Cadence adjust');
+        }
+      }
+
+      // Stride Length Analysis
+      if (data.strideLength) {
+        if (data.strideLength === 'normal') {
+          add(good, 'Horizontal Stride Extension', 'Your horizontal projection looks appropriate, promoting balanced hip stance dynamics.', 'good');
+        } else if (data.strideLength === 'increased') {
+          add(attention, 'Horizontal Stride Overreaching', 'You are projecting your swing foot too far forward relative to your Center of Mass, creating braking forces.', 'focus');
+          chips.push('Overreach corr');
+        }
+      }
+
+      // Forward lean
+      if (data.forwardLean) {
+        if (data.forwardLean === 'normal') {
+          add(good, 'Sagittal Trunk Alignment', 'Your posture demonstrates optimal slight forward projection, utilizing structural gravity help.', 'good');
+        } else {
+          add(attention, 'Trunk Posture Alignment', 
+            data.forwardLean === 'reduced'
+              ? 'Your upright posture might shift excess dynamic workload onto knee structures.'
+              : 'An excessive forward lean was observed, which can stress hip and lower lumbar stabilizers.',
+            'watch');
+          chips.push('Trunk alignment');
+        }
+      }
+
+      // Pelvic Tilt Analysis
+      if (data.pelvicTilt) {
+        if (data.pelvicTilt === 'neutral') {
+          add(good, 'Pelvic Tilt Alignment', 'Your pelvic base remains neutral during stance, ensuring optimal gluteal loading patterns.', 'good');
+        } else if (data.pelvicTilt === 'anterior') {
+          add(attention, 'Anterior Pelvic Tilt', 'An forward-tilted pelvic alignment is noted, which can increase lower lumbar extension demands and reduce gluteal activation.', 'focus');
+          chips.push('Anterior tilt work');
+        } else if (data.pelvicTilt === 'posterior') {
+          add(attention, 'Posterior Pelvic Tilt', 'A backward-tucked pelvic alignment is observed, potentially limiting optimal hip extension pathways.', 'watch');
+          chips.push('Posterior tilt work');
+        }
+      }
+
+      // Hip stability
+      const hipIn = [];
+      if (data.hipStabilityLeft === 'adducted') hipIn.push('left');
+      if (data.hipStabilityRight === 'adducted') hipIn.push('right');
+      
+      if (hipIn.length === 0 && (data.hipStabilityLeft || data.hipStabilityRight)) {
+        add(good, 'Hip Frontal Plane Alignment', 'Your hip alignment remains steady without inward collapse.', 'good');
+      } else if (hipIn.length) {
+        const targetSide = data.symptomaticSide === 'na' ? hipIn.join(' and ') : data.symptomaticSide;
+        add(attention, 'Dynamic Femoral Adduction', `The thigh rotates inward beyond typical range on the ${targetSide} side during stance, increasing load upstream.`, 'focus');
+        chips.push('Hip control work');
+      }
+
+      // Knee control
+      const kneeIn = [];
+      if (data.kneeStabilityLeft === 'adducted') kneeIn.push('left');
+      if (data.kneeStabilityRight === 'adducted') kneeIn.push('right');
+      
+      if (kneeIn.length === 0 && (data.kneeStabilityLeft || data.kneeStabilityRight)) {
+        add(good, 'Knee Frontal Plane Stability', 'Excellent knee tracking in alignment with feet and hips under landing loads.', 'good');
+      } else if (kneeIn.length) {
+        const targetSide = data.symptomaticSide === 'na' ? kneeIn.join(' and ') : data.symptomaticSide;
+        add(attention, 'Dynamic Knee Valgus Tracking', `The knee tracking line moves inward toward center on the ${targetSide} side during loading, stressing patellofemoral structures.`, 'focus');
+        chips.push('Knee tracking');
+      }
+
+      // Pronation
+      const pronSides = [];
+      if (data.pronationLeft === 'increased') pronSides.push('left');
+      if (data.pronationRight === 'increased') pronSides.push('right');
+      
+      if (pronSides.length === 0 && (data.pronationLeft || data.pronationRight)) {
+        add(good, 'Pronation Velocity & Control', 'Foot structure pronates normally, naturally absorbing landing shock.', 'good');
+      } else if (pronSides.length) {
+        const targetSide = data.symptomaticSide === 'na' ? pronSides.join(' and ') : data.symptomaticSide;
+        add(attention, 'Prolonged Foot Pronation', `Increased/prolonged pronation sequence noted on the ${targetSide} side, shifting torque upstream.`, 'watch');
+        chips.push('Foot control');
+      }
+
+      // Ankle Dorsiflexion
+      const ankleVals = [data.ankleDfCkcLeft, data.ankleDfCkcRight].filter(v => v != null);
+      if (ankleVals.length) {
+        const worst = Math.min(...ankleVals);
+        const s = ankleStatus(worst);
+        if (s === 'good') {
+          add(good, 'Ankle Closed-Chain Mobility', `Your closed-chain knee-to-wall distance (${worst} cm) indicates plenty of ankle mobility to support stance clearance.`, 'good');
+        } else {
+          add(attention, 'Closed-Chain Dorsiflexion Limit', `Knee-to-wall mobility is restricted (${worst} cm), forcing early heel rise or foot flattening compensations.`, s);
+          chips.push('Ankle mobility');
+        }
+      }
+
+      // Dynamic hip strength imbalances
+      if (data.hipAbductionLeft != null && data.hipAbductionRight != null) {
+        const s = strengthStatus(data.hipAbductionLeft, data.hipAbductionRight);
+        if (s === 'good') {
+          add(good, 'Side-to-Side Hip Strength Balance', 'Bilateral hip abduction torque outputs look symmetric and balanced.', 'good');
+        } else {
+          const lower = Math.min(data.hipAbductionLeft, data.hipAbductionRight);
+          const higher = Math.max(data.hipAbductionLeft, data.hipAbductionRight);
+          const pctImbalance = Math.round((1 - (lower / higher)) * 100);
+          add(attention, 'Hip Abduction Strength Asymmetry', `A strength discrepancy of ${pctImbalance}% was measured between left and right hip extensors/abductors, limiting symmetrical control.`, s);
+          chips.push('Hip strength balance');
+        }
+      }
+
+      // Add checked exercises from the custom checklist
+      state.selectedExercises.forEach(exId => {
+        const found = exerciseDatabase.find(ex => ex.id === exId);
+        if (found) {
+          step(found.title, found.text);
+        }
+      });
+
+      // Calculate totals
+      const focusCount = attention.filter(x => x.status === 'focus').length;
+      const watchCount = attention.filter(x => x.status === 'watch').length;
+      const goodCount = good.length;
+
+      // Tone Selection adjustments for the patient overview
+      let summary = 'Your running form exhibits strong baseline mechanics alongside some specific areas to optimize.';
+      if (focusCount >= 4) {
+        summary = 'Multiple primary gait components require adjustment. Prioritizing these foundational changes will help you build running comfort and mileage tolerance.';
+      } else if (focusCount >= 2) {
+        summary = 'A few key kinematic changes are recommended. Addressing these specific variables will help optimize your overall running mechanics and efficiency.';
+      } else if (focusCount >= 1 || watchCount >= 2) {
+        summary = 'Minor biomechanical deviations were noted. Applying the targeted cues below will assist you in refining your stride.';
+      }
+
+      if (data.tone === 'reassuring') {
+        summary = 'The great news is that your running foundation is solid, and these mechanics are highly adaptable! ' + summary;
+      } else if (data.tone === 'direct') {
+        summary = 'To improve performance and safety, focus on correcting the primary gait compensations outlined below. ' + summary;
+      }
+
+      let mainFocus = 'Technique';
+      if (chips.includes('Hip strength balance') || chips.includes('Anterior tilt work') || chips.includes('Posterior tilt work')) {
+        mainFocus = 'Pelvic / Hip Strength';
+      } else if (chips.includes('Ankle mobility')) {
+        mainFocus = 'Ankle Mobility';
+      }
+
+      return {
+        good,
+        attention,
+        steps: [...new Map(steps.map(s => [s.title, s])).values()],
+        chips: [...new Set(chips)].slice(0, 6),
+        focusCount,
+        watchCount,
+        goodCount,
+        summary,
+        mainFocus
+      };
+    }
+
+    function renderReport() {
+      const data = collect();
+      if (!data.patientName) {
+        showModal('Required Information Missing', 'Please enter a Patient Name on the top-left form before compiling the custom patient report.', 'Got it');
+        return;
+      }
+
+      const r = buildReport(data);
+
+      // DOM Updates
+      document.getElementById('rPatient').textContent = data.patientName;
+      document.getElementById('rDate').textContent = data.date || '—';
+      document.getElementById('rConcern').textContent = data.mainConcern || 'General Biomechanics';
+      
+      document.getElementById('focusCount').textContent = r.focusCount;
+      document.getElementById('watchCount').textContent = r.watchCount;
+      document.getElementById('goodCount').textContent = r.goodCount;
+      document.getElementById('mainFocus').textContent = r.mainFocus;
+      document.getElementById('summaryText').textContent = r.summary;
+      document.getElementById('noteText').textContent = data.notes || 'No intake records captured.';
+      
+      // Ankle custom metric descriptive output
+      let ankleDetails = 'Ankle closed-chain dorsiflexion path. ';
+      if (data.ankleDfCkcLeft || data.ankleDfCkcRight) {
+        ankleDetails += `Ankle values were measured at L: ${data.ankleDfCkcLeft || 'N/A'} cm and R: ${data.ankleDfCkcRight || 'N/A'} cm. `;
+        if (Math.abs((data.ankleDfCkcLeft || 0) - (data.ankleDfCkcRight || 0)) >= 2) {
+          ankleDetails += 'Note: A notable side-to-side mobility mismatch exists, which may trigger structural stance compensations.';
+        } else {
+          ankleDetails += 'Side-to-side ankle mobility displays symmetrical joint path properties.';
+        }
+      } else {
+        ankleDetails += 'Normative target values recommend keeping &ge; 12.0 cm on both sides to facilitate stable forward leg transition and minimize knee compensation.';
+      }
+      document.getElementById('ankleDetailText').textContent = ankleDetails;
+
+      document.getElementById('keyChips').innerHTML = r.chips.length
+        ? r.chips.map(c => `<span class="chip">${c}</span>`).join('')
+        : '<span class="chip">Symmetrical Practice</span>';
+
+      // Load Good Findings List
+      document.getElementById('goodList').innerHTML = r.good.length
+        ? r.good.map(f => `
+            <div class="finding">
+              <div class="finding-head">
+                <strong>${f.title}</strong>
+                ${pill('good')}
+              </div>
+              <p class="muted" style="margin-top:6px; font-size:13px;">${f.detail}</p>
+            </div>`).join('')
+        : '<p class="muted" style="font-size:13px;">No optimal biomechanical components recorded.</p>';
+
+      // Load Attention Findings List
+      document.getElementById('attentionList').innerHTML = r.attention.length
+        ? r.attention.map(f => `
+            <div class="finding">
+              <div class="finding-head">
+                <strong>${f.title}</strong>
+                ${pill(f.status)}
+              </div>
+              <p class="muted" style="margin-top:6px; font-size:13px;">${f.detail}</p>
+            </div>`).join('')
+        : '<p class="muted" style="font-size:13px;">No urgent gait compensation concerns flagged.</p>';
+
+      // Load Dynamic Custom Home Plan List
+      document.getElementById('stepsList').innerHTML = r.steps.length
+        ? r.steps.map(s => `
+            <div class="step">
+              <strong style="color: var(--primary2);">${s.title}</strong>
+              <p class="muted" style="margin-top:4px; font-size:13px;">${s.text}</p>
+            </div>`).join('')
+        : '<p class="muted" style="font-size:13px;">Please select target exercise plans on the left form options.</p>';
+
+      showToast('Patient Gait Report compiled successfully!', 'success');
+      
+      // Auto Scroll to updated report frame
+      document.getElementById('reportPane').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function fillDemo() {
+      const setVal = (n, v) => {
+        const el = document.querySelector(`[name="${n}"]`);
+        if (el) el.value = v;
+      };
+      
+      setVal('patientName', 'Jessica Peterson');
+      setVal('date', new Date().toISOString().split('T')[0]);
+      setVal('age', '29');
+      setVal('mainConcern', 'Lateral right knee discomfort starting at mile 2');
+      setVal('notes', 'Jessica notes mild localized lateral knee pain. Symptoms are elevated by speed work. Patient is targeting an upcoming spring half-marathon and wants to run pain-free.');
+      setVal('strideRate', '164');
+      setVal('ankleDfCkcLeft', '12.5');
+      setVal('ankleDfCkcRight', '9.0');
+      setVal('hipAbductionLeft', '38');
+      setVal('hipAbductionRight', '29');
+      setVal('limbLengthLeft', '88');
+      setVal('limbLengthRight', '88.5');
+      setVal('slrAntReachLeft', '64');
+      setVal('slrAntReachRight', '52');
+
+      Object.assign(state, {
+        tone: 'reassuring',
+        symptomaticSide: 'right',
+        strideLength: 'increased',
+        forwardLean: 'reduced',
+        pelvicTilt: 'anterior',
+        hipStabilityLeft: 'normal',
+        hipStabilityRight: 'adducted',
+        kneeStabilityLeft: 'normal',
+        kneeStabilityRight: 'adducted',
+        pronationLeft: 'normal',
+        pronationRight: 'increased',
+        footStrikeLeft: 'midfoot',
+        footStrikeRight: 'heel',
+        selectedExercises: ['half_kneeling_ankle', 'hip_flexor_stretch', 'standing_clamshells', 'cadence_metronome_lean']
+      });
+
+      // Update segment button classes
+      document.querySelectorAll('.seg').forEach(el => {
+        const name = el.dataset.name;
+        [...el.children].forEach(c => c.classList.toggle('active', c.dataset.value === state[name]));
+      });
+
+      // Update toggle buttons active class
+      buildToggles();
+      buildExercisePlanner();
+      renderReport();
+    }
+
+    // Clear and reset state
+    function clearForm() {
+      document.getElementById('assessmentForm').reset();
+      Object.keys(state).forEach(k => {
+        if (k !== 'tone' && k !== 'strengthUnit' && k !== 'symptomaticSide' && k !== 'selectedExercises') {
+          delete state[k];
+        }
+      });
+      
+      state.tone = 'balanced';
+      state.strengthUnit = 'lbs';
+      state.symptomaticSide = 'right';
+      state.pelvicTilt = 'neutral';
+      state.selectedExercises = [];
+
+      buildSegs();
+      buildToggles();
+      buildExercisePlanner();
+      
+      document.querySelector('[name="date"]').value = new Date().toISOString().split('T')[0];
+      showToast('Form fields cleared to blank values.', 'info');
+    }
+
+    document.getElementById('generateBtn').onclick = renderReport;
+    document.getElementById('generateBottomBtn').onclick = renderReport;
+    document.getElementById('jumpReportBtn').onclick = () => {
+      document.getElementById('reportPane').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    
+    document.getElementById('demoBtn').onclick = fillDemo;
+    document.getElementById('clearBtn').onclick = clearForm;
+    
+    document.getElementById('printBtn').onclick = () => {
+      showModal(
+        'Print Export Instructions', 
+        'Ready to export! Select "Save as PDF" as your destination under your browser print settings. For best results, keep background graphics enabled.', 
+        'Proceed to Print'
+      );
+      
+      // Delay printing slightly so the modal overlay can close visually
+      document.getElementById('modalOkBtn').addEventListener('click', function printTrigger() {
+        window.print();
+        document.getElementById('modalOkBtn').removeEventListener('click', printTrigger);
+      });
+    };
+
+    // Initialize application interface elements
+    window.onload = function() {
+      buildSegs();
+      buildToggles();
+      buildExercisePlanner();
+      document.querySelector('[name="date"]').value = new Date().toISOString().split('T')[0];
+    };
+  </script>
+</body>
+</html>
