@@ -687,7 +687,7 @@
         <div class="chips">
           <span class="chip">Pelvic Tilt Alignment</span>
           <span class="chip">Custom Drills Selector</span>
-          <span class="chip">CKC Dorsiflexion</span>
+          <span class="chip">Performance Track Profiler</span>
           <span class="chip">PDF-Friendly Export</span>
         </div>
       </div>
@@ -741,6 +741,34 @@
             <div class="field" style="margin-top:14px">
               <label>Session subjective intake notes</label>
               <textarea name="notes" placeholder="Describe symptoms, training volume, shoes, running history, and specific goals..."></textarea>
+            </div>
+          </div>
+
+          <!-- NEW PERFORMANCE TRACK TIMES SECTION -->
+          <div class="section" style="background: linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);">
+            <div class="section-head">
+              <h2>Performance &amp; Track Times</h2>
+              <p>Log sprint times and run tests to calculate physiological profile and recommended training splits.</p>
+            </div>
+            <div class="grid3">
+              <div class="field">
+                <label>100-Yard Dash (sec)</label>
+                <input type="number" step="0.01" name="dash100" placeholder="e.g. 13.5">
+              </div>
+              <div class="field">
+                <label>400m Run</label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="number" name="min400" placeholder="Min" style="flex: 1;">
+                  <input type="number" step="0.1" name="sec400" placeholder="Sec" style="flex: 1;">
+                </div>
+              </div>
+              <div class="field">
+                <label>Mile Run</label>
+                <div style="display: flex; gap: 6px;">
+                  <input type="number" name="minMile" placeholder="Min" style="flex: 1;">
+                  <input type="number" step="0.1" name="secMile" placeholder="Sec" style="flex: 1;">
+                </div>
+              </div>
             </div>
           </div>
 
@@ -962,6 +990,33 @@
             </div>
           </div>
 
+          <!-- NEW PERFORMANCE ANALYSIS AND WORKOUT RECS BLOCK -->
+          <div class="summary-box" style="margin-top:20px; border-left: 4px solid var(--accent); background: linear-gradient(180deg, #fffcf6 0%, #fffbf2 100%);">
+            <h3 style="font-size: 18px; color: var(--primary2);">Performance Profile &amp; Workout Focus</h3>
+            <p class="muted" style="font-size:13px; margin-bottom:12px;">Dynamic athletic profiling determined by comparing peak muscular speed (100yd), lactic power (400m), and aerobic capacity (Mile).</p>
+            
+            <div class="grid3" style="gap:10px;">
+              <div class="stat" style="padding:10px 8px; border-radius:10px; background:#fff;">
+                <span style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase;">100yd Dash</span>
+                <strong id="rDash" style="font-size:18px; color:var(--text); margin-top:2px;">—</strong>
+              </div>
+              <div class="stat" style="padding:10px 8px; border-radius:10px; background:#fff;">
+                <span style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase;">400m Run</span>
+                <strong id="r400" style="font-size:18px; color:var(--text); margin-top:2px;">—</strong>
+              </div>
+              <div class="stat" style="padding:10px 8px; border-radius:10px; background:#fff;">
+                <span style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase;">Mile Run</span>
+                <strong id="rMile" style="font-size:18px; color:var(--text); margin-top:2px;">—</strong>
+              </div>
+            </div>
+
+            <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--line);">
+              <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:var(--accent); letter-spacing:0.05em;">Athlete Engine Type</div>
+              <h4 id="rEngineType" style="font-size:18px; font-family:'DM Serif Display',serif; color:var(--primary2); margin-top:2px;">Awaiting Performance Data...</h4>
+              <p class="muted" id="rWorkoutRec" style="margin-top:8px; font-size:13.5px; line-height:1.6;"></p>
+            </div>
+          </div>
+
           <div class="patient-meta">
             <div class="summary-box">
               <h3 style="font-size: 16px; color: var(--primary2);">Subjective &amp; Clinical Notes</h3>
@@ -1045,7 +1100,7 @@
       na: 'No main side'
     };
 
-    // Updated clinical exercises database based on user instruction
+    // Updated clinical exercises database based on running workshop drills
     const exerciseDatabase = [
       { 
         id: 'half_kneeling_ankle', 
@@ -1271,6 +1326,11 @@
         tone: state.tone,
         strengthUnit: state.strengthUnit,
         symptomaticSide: state.symptomaticSide || 'right',
+        dash100: getNum('dash100'),
+        min400: getNum('min400'),
+        sec400: getNum('sec400'),
+        minMile: getNum('minMile'),
+        secMile: getNum('secMile'),
         strideLength: state.strideLength || '',
         strideRate: getNum('strideRate'),
         forwardLean: state.forwardLean || '',
@@ -1324,6 +1384,54 @@
       const good = [], attention = [], steps = [], chips = [];
       const add = (arr, title, detail, status) => arr.push({ title, detail, status });
       const step = (title, text) => steps.push({ title, text });
+
+      // Calculate Performance Metrics Recommendations
+      let workoutRec = "Complete the track/sprint test values on the left to unlock specialized physiological training recommendations.";
+      let engineType = "Awaiting Performance Data";
+
+      const dash = data.dash100;
+      const total400Sec = (data.min400 != null || data.sec400 != null) ? ((data.min400 || 0) * 60 + (data.sec400 || 0)) : null;
+      const totalMileSec = (data.minMile != null || data.secMile != null) ? ((data.minMile || 0) * 60 + (data.secMile || 0)) : null;
+
+      if (dash != null && total400Sec != null && totalMileSec != null) {
+        // Score 100yd Dash (Neuromuscular velocity/explosiveness points)
+        let dashPts = 1;
+        if (dash < 11.8) dashPts = 10;
+        else if (dash < 13.0) dashPts = 8;
+        else if (dash < 14.5) dashPts = 6;
+        else if (dash < 16.5) dashPts = 4;
+        else dashPts = 2;
+
+        // Score 400m Run (Anaerobic / Lactic power points)
+        let pts400 = 1;
+        if (total400Sec < 58) pts400 = 10;
+        else if (total400Sec < 68) pts400 = 8;
+        else if (total400Sec < 82) pts400 = 6;
+        else if (total400Sec < 100) pts400 = 4;
+        else pts400 = 2;
+
+        // Score Mile Run (Aerobic threshold / endurance points)
+        let milePts = 1;
+        if (totalMileSec < 310) milePts = 10;
+        else if (totalMileSec < 380) milePts = 8;
+        else if (totalMileSec < 480) milePts = 6;
+        else if (totalMileSec < 600) milePts = 4;
+        else milePts = 2;
+
+        const speedAvg = (dashPts + pts400) / 2;
+        const scoreDiff = speedAvg - milePts;
+
+        if (scoreDiff >= 1.5) {
+          engineType = "Speed-Dominant / Fast-Twitch Profile";
+          workoutRec = "Your performance metrics highlight a high-velocity, anaerobically gifted engine. You possess exceptional explosive power and fast muscle-fiber recruitment, but fatigue rapidly during sustained aerobic volume. <br><br><strong style='color:var(--primary2)'>Targeted Workout Recommendations:</strong><br>• <strong>Aerobic Base Building:</strong> Perform 75-80% of your weekly volume in Zone 2 (easy conversation pace) to stimulate mitochondrial density and capillary growth without accumulating excessive metabolic fatigue.<br>• <strong>Aerobic Progressions:</strong> Focus on 15 to 25-minute progressive steady-state tempo runs at an effort just below your breathing threshold to push your lactate limit upward.<br>• <strong>Strict Recovery Pacing:</strong> Keep your recovery and long runs genuinely easy. Fast-twitch profiles struggle to clear systemic metabolic waste when run too close to threshold efforts.";
+        } else if (scoreDiff <= -1.5) {
+          engineType = "Endurance-Dominant / Slow-Twitch Cruiser";
+          workoutRec = "Your performance metrics reveal superb aerobic efficiency and fatigue resistance, but you are likely limited by peak explosive velocity, neural motor drive, or mechanical stride power. <br><br><strong style='color:var(--primary2)'>Targeted Workout Recommendations:</strong><br>• <strong>Neuromuscular Speed-Play:</strong> Add 4 to 6 repeats of 80m accelerating fast-turnover strides with complete passive rest (90s+) between runs on easy days to develop explosive coordination.<br>• <strong>Short Hill Sprints:</strong> Perform 6 to 8 repeats of 8-10 second steep hill reps at maximal effort to recruit under-utilized high-threshold motor units and strengthen stride muscles.<br>• <strong>Neuromuscular VO2 Max:</strong> Include structured high-intensity sessions like 6x400m repeats at your 1500m/mile race pace with 2.5 minutes of complete walking recovery to raise your absolute ceiling.";
+        } else {
+          engineType = "Balanced Hybrid Athlete";
+          workoutRec = "You show a beautifully balanced athletic profile, displaying solid mechanical capability and metabolic conditioning across sprinting, lactic tolerance, and aerobic capacity. You are highly versatile. <br><br><strong style='color:var(--primary2)'>Targeted Workout Recommendations:</strong><br>• <strong>Polarized Training (80/20):</strong> Maintain an 80% easy, 20% high-quality balance to maximize aerobic gains while targeting specific high-end thresholds.<br>• <strong>Classic Lactate Threshold Intervals:</strong> Implement sessions such as 4x1000m repeats at 10k effort with structured, active recovery jogs (60-90s) to comfortably lock in high efficiency.<br>• <strong>Dynamic Pace Play (Fartleks):</strong> Mix unstructured variables into your medium-distance runs (e.g., alternating 3 minutes hard, 2 minutes easy) to teach your nervous system to adjust smoothly under effort.";
+        }
+      }
 
       // Cadence Analysis
       const c = cadenceStatus(data.strideRate);
@@ -1488,8 +1596,21 @@
         watchCount,
         goodCount,
         summary,
-        mainFocus
+        mainFocus,
+        engineType,
+        workoutRec,
+        dash,
+        total400Sec,
+        totalMileSec
       };
+    }
+
+    function formatTimeValue(min, sec) {
+      if (min == null && sec == null) return "—";
+      let total = (min || 0) * 60 + (sec || 0);
+      let m = Math.floor(total / 60);
+      let s = Math.round((total % 60) * 10) / 10;
+      return `${m}m ${s < 10 ? '0' + s : s}s`;
     }
 
     function renderReport() {
@@ -1513,6 +1634,13 @@
       document.getElementById('summaryText').textContent = r.summary;
       document.getElementById('noteText').textContent = data.notes || 'No intake records captured.';
       
+      // Update performance profile readouts
+      document.getElementById('rDash').textContent = r.dash != null ? `${r.dash}s` : "—";
+      document.getElementById('r400').textContent = formatTimeValue(data.min400, data.sec400);
+      document.getElementById('rMile').textContent = formatTimeValue(data.minMile, data.secMile);
+      document.getElementById('rEngineType').textContent = r.engineType;
+      document.getElementById('rWorkoutRec').innerHTML = r.workoutRec;
+
       // Ankle custom metric descriptive output
       let ankleDetails = 'Ankle closed-chain dorsiflexion path. ';
       if (data.ankleDfCkcLeft || data.ankleDfCkcRight) {
@@ -1581,6 +1709,14 @@
       setVal('age', '29');
       setVal('mainConcern', 'Lateral right knee discomfort starting at mile 2');
       setVal('notes', 'Jessica notes mild localized lateral knee pain. Symptoms are elevated by speed work. Patient is targeting an upcoming spring half-marathon and wants to run pain-free.');
+      
+      // Demo Track Times
+      setVal('dash100', '14.8');
+      setVal('min400', '1');
+      setVal('sec400', '24'); // 1m 24s
+      setVal('minMile', '6');
+      setVal('secMile', '12'); // 6m 12s -> Endurance-dominant Slow-twitch profile!
+
       setVal('strideRate', '164');
       setVal('ankleDfCkcLeft', '12.5');
       setVal('ankleDfCkcRight', '9.0');
